@@ -6,15 +6,14 @@
 #include "forge_string.c"
 #include "forge_logger.c"
 
+#include "forge_renderer.c"
+
 #if FR_PLATFORM_LINUX
-#include "FR_PLATFORM_LINUX/forge_linux_main.c"
+#include "FR_PLATFORM_LINUX/forge_os_linux.c"
 #elif FR_PLATFORM_WINDOWS
-#include <Windows.h>
-#include "forge_win32_main.c"
+#include "forge_os_win32.c"
 #else
 #error missing platform detection
 #endif
-
-#include "forge_render.c"
 
 #include "app.c"

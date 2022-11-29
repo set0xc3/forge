@@ -1,3 +1,5 @@
+#include <Windows.h>
+
 void __stdcall
 win32_file_io_completion_routine(DWORD error_code,
 								 DWORD number_of_bytes_transfered,
@@ -229,6 +231,7 @@ LRESULT CALLBACK win32_window_proc(HWND hwnd, UINT umsg, WPARAM wparam, LPARAM l
 		}
 		case WM_PAINT:
 		{
+#if 0
 			String8 greeting = str8_lit("Hello, World!");
 			PAINTSTRUCT ps;
 			HDC hdc = BeginPaint(hwnd, &ps);
@@ -237,6 +240,7 @@ LRESULT CALLBACK win32_window_proc(HWND hwnd, UINT umsg, WPARAM wparam, LPARAM l
 			TextOutA(hdc, 5, 5, (LPCSTR)greeting.str, (i32)greeting.size);
 			
 			EndPaint(hwnd, &ps);
+#endif
 			break;
 		}
 		default:
@@ -348,7 +352,7 @@ os_window_process_event(void* handle)
 {
 	ASSERT(handle == 0);
 	MSG msg;
-	while (PeekMessageA(&msg, 0, 0, 0, PM_REMOVE) > 0)
+	if (PeekMessageA(&msg, 0, 0, 0, PM_REMOVE))
 	{
 		if (msg.message == WM_QUIT)
 		{

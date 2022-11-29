@@ -3,7 +3,8 @@
 #include "forge_linked_list.h"
 #include "forge_string.h"
 #include "forge_logger.h"
-#include "forge_os_main.h"
-#include "forge_render.h"
+#include "forge_renderer.h"
+
+#include "forge_os.h"
 
 #include "app.h"

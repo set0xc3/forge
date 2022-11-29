@@ -4,6 +4,7 @@ echo "-------------------------"
 echo "        [Build]          "
 echo "-------------------------"
 
+
 : -------- variables --------
 
 set ROOT=%cd%
@@ -18,6 +19,10 @@ set INCLUDE=
 set LIBS=
 set FLAGS=
 
+set INCLUDE=-I"C:\Program Files (x86)\Windows Kits\10\Include\10.0.22621.0\ucrt" 
+set INCLUDE=%INCLUDE% -I"C:\Program Files (x86)\Windows Kits\10\Include\10.0.22621.0\um"
+set INCLUDE=%INCLUDE% -I"C:\Program Files (x86)\Windows Kits\10\Include\10.0.22621.0\shared"
+set INCLUDE=%INCLUDE% -I"C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.34.31933\include" 
 
 : -------- pre-build --------
 
@@ -34,6 +39,7 @@ if not exist %BUILD_DIR%\%MODE_COMPILE%\%ARCH% mkdir %BUILD_DIR%\%MODE_COMPILE%\
 
 pushd %BUILD_DIR%\%MODE_COMPILE%\%ARCH%
 
+
 : -------- forge --------
 
 set OUT_NAME=forge
@@ -49,15 +55,11 @@ if %MODE_COMPILE%=="release" set FLAGS=%FLAGS%
 
 set FLAGS=%FLAGS% -DFR_PLATFORM_WINDOWS=1 -DFR_DYNAMIC_LINK_API=1 -DFR_CONSOLE=1
 
-set INCLUDE=-I"C:\Program Files (x86)\Windows Kits\10\INCLUDE\10.0.22621.0\ucrt" 
-set INCLUDE=%INCLUDE% -I"C:\Program Files (x86)\Windows Kits\10\Include\10.0.22621.0\um"
-set INCLUDE=%INCLUDE% -I"C:\Program Files (x86)\Windows Kits\10\Include\10.0.22621.0\shared"
-set INCLUDE=%INCLUDE% -I"C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.34.31933\INCLUDE" 
-
 : -------- executable --------
 
 echo "[+] Building %OUT_NAME%.exe"
 clang %INCLUDE% %LIBS% %FLAGS% %SOURCE% -o .\%OUT_NAME%.exe
+
 
 : -------- Sandbox --------
 
@@ -75,10 +77,30 @@ if %MODE_COMPILE%=="release" set FLAGS=%FLAGS%
 
 set FLAGS=%FLAGS% -DFR_PLATFORM_WINDOWS=1 -DFR_STATIC_LINK_API=1
 
-set INCLUDE=-I"C:\Program Files (x86)\Windows Kits\10\INCLUDE\10.0.22621.0\ucrt" 
-set INCLUDE=%INCLUDE% -I"C:\Program Files (x86)\Windows Kits\10\Include\10.0.22621.0\um"
-set INCLUDE=%INCLUDE% -I"C:\Program Files (x86)\Windows Kits\10\Include\10.0.22621.0\shared"
-set INCLUDE=%INCLUDE% -I"C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.34.31933\INCLUDE" 
+set INCLUDE=%INCLUDE% -I"%CODE_DIR%"
+
+: -------- Dynamic library --------
+echo "[+] Building %OUT_NAME%.dll"
+clang  %INCLUDE% %FLAGS% %SOURCE% -c -o .\%OUT_NAME%.o
+clang %INCLUDE% %LIBS% %FLAGS% -shared -o .\%OUT_NAME%.dll .\%OUT_NAME%.o
+
+
+: -------- Renderer OpenGL --------
+
+set OUT_NAME=renderer_opengl
+set SOURCE="%CODE_DIR%\forge_renderer_opengl.c"
+
+set LIBS=-lUser32.lib -lGdi32.lib -lopengl32.lib -L.\ -lforge.lib
+set FLAGS=-std=c11 -O0 -w
+
+if %ARCH%=="x32" set FLAGS=%FLAGS% -m32
+if %ARCH%=="x64" set FLAGS=%FLAGS% -m64
+
+if %MODE_COMPILE%=="debug"   set FLAGS=%FLAGS% -g -DFR_ENABLE_ASSERT=1 -DFR_BUILD_INTERNAL=1 -DFR_BUILD_SLOW=1
+if %MODE_COMPILE%=="release" set FLAGS=%FLAGS%
+
+set FLAGS=%FLAGS% -DFR_PLATFORM_WINDOWS=1 -DFR_DYNAMIC_LINK_API=1
+
 set INCLUDE=%INCLUDE% -I"%CODE_DIR%"
 
 : -------- Dynamic library --------

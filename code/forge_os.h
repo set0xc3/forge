@@ -1,5 +1,5 @@
-#ifndef OS_MAIN_H
-#define OS_MAIN_H
+#ifndef OS_H
+#define OS_H
 
 typedef struct DebugFileState
 {
@@ -37,4 +37,4 @@ FR_API Vector2i       os_window_get_position(void* handle);
 FR_API Vector2i       os_window_get_size(void* handle);
 
 
-#endif //OS_MAIN_H
+#endif //OS_H

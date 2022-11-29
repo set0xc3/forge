@@ -170,10 +170,10 @@ FR_API void
 	}
 	
 	xcb_create_colormap(in->xcb.connection,
-											XCB_COLORMAP_ALLOC_NONE,
-											in->xcb.colormap,
-											in->xcb.screen->root,
-											in->visual_id);
+						XCB_COLORMAP_ALLOC_NONE,
+						in->xcb.colormap,
+						in->xcb.screen->root,
+						in->visual_id);
 	
 	i32 event_mask = 
 		XCB_EVENT_MASK_STRUCTURE_NOTIFY |
@@ -191,27 +191,27 @@ FR_API void
 	i32 value_mask = XCB_CW_EVENT_MASK | XCB_CW_COLORMAP;
 	
 	xcb_create_window(in->xcb.connection, 
-										XCB_COPY_FROM_PARENT, 
-										in->xcb.window, 
-										in->xcb.screen->root,
-										in->window.position.x, in->window.position.y,
-										in->window.size.x, in->window.size.y,
-										0,
-										XCB_WINDOW_CLASS_INPUT_OUTPUT, 
-										in->visual_id,
-										value_mask, 
-										value_list);
+					  XCB_COPY_FROM_PARENT, 
+					  in->xcb.window, 
+					  in->xcb.screen->root,
+					  in->window.position.x, in->window.position.y,
+					  in->window.size.x, in->window.size.y,
+					  0,
+					  XCB_WINDOW_CLASS_INPUT_OUTPUT, 
+					  in->visual_id,
+					  value_mask, 
+					  value_list);
 	
 	{
 		// Set window name
 		xcb_change_property(in->xcb.connection, 
-												XCB_PROP_MODE_REPLACE, 
-												in->xcb.window,
-												XCB_ATOM_WM_NAME, 
-												XCB_ATOM_STRING, 
-												8,
-												strlen((char *)in->window.title.str), 
-												(char *)in->window.title.str);
+							XCB_PROP_MODE_REPLACE, 
+							in->xcb.window,
+							XCB_ATOM_WM_NAME, 
+							XCB_ATOM_STRING, 
+							8,
+							strlen((char *)in->window.title.str), 
+							(char *)in->window.title.str);
 		
 		xcb_intern_atom_cookie_t protocols_cookie = xcb_intern_atom(in->xcb.connection, 0, strlen("WM_PROTOCOLS"), "WM_PROTOCOLS");
 		xcb_intern_atom_reply_t* protocols_reply  = xcb_intern_atom_reply(in->xcb.connection, protocols_cookie, 0);
@@ -220,13 +220,13 @@ FR_API void
 		xcb_intern_atom_reply_t* del_reply  = xcb_intern_atom_reply(in->xcb.connection, del_cookie, 0);
 		
 		xcb_change_property(in->xcb.connection, 
-												XCB_PROP_MODE_REPLACE,
-												in->xcb.window,
-												protocols_reply->atom, 
-												XCB_ATOM_ATOM, 
-												32,
-												1,
-												&del_reply->atom);
+							XCB_PROP_MODE_REPLACE,
+							in->xcb.window,
+							protocols_reply->atom, 
+							XCB_ATOM_ATOM, 
+							32,
+							1,
+							&del_reply->atom);
 		MEMORY_FREE(protocols_reply);
 		MEMORY_FREE(del_reply);
 	}
@@ -242,13 +242,13 @@ FR_API void
 	// TODO
 	{
 		//const static i32_t values[] = { 800, 600 };
-    //xcb_configure_window(in->xcb.connection, in->xcb.window, XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y, values);
+		//xcb_configure_window(in->xcb.connection, in->xcb.window, XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y, values);
 	}
 	
 	LOG_INFO("Create window: '%s', [%i, %i], [%i, %i]", 
-					 in->window.title.str, 
-					 in->window.position.x, in->window.position.y, 
-					 in->window.size.x, in->window.size.y);
+			 in->window.title.str, 
+			 in->window.position.x, in->window.position.y, 
+			 in->window.size.x, in->window.size.y);
 	
 	return (void *)in;
 }
@@ -262,9 +262,9 @@ os_window_destroy(void *handle)
 	xcb_destroy_window(in->xcb.connection, in->xcb.window);
 	
 	LOG_DEBUG("Destroy window: '%s', [%i, %i], [%i, %i]", 
-						in->window.title.str, 
-						in->window.position.x, in->window.position.y, 
-						in->window.size.x, in->window.size.y);
+			  in->window.title.str, 
+			  in->window.position.x, in->window.position.y, 
+			  in->window.size.x, in->window.size.y);
 }
 
 FR_API void 
@@ -288,8 +288,8 @@ os_window_process_event(void *handle)
 	LinuxInternalState *in = (LinuxInternalState *)handle;
 	
 	for(xcb_generic_event_t *xcb_event = xcb_poll_for_event(in->xcb.connection); 
-			xcb_event != 0;
-			xcb_event = xcb_poll_for_event(in->xcb.connection))
+		xcb_event != 0;
+		xcb_event = xcb_poll_for_event(in->xcb.connection))
 	{
 		OS_Event *os_event = 0;
 		bool32 is_press = false;
