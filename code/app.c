@@ -9,7 +9,7 @@ app_entry_point(void)
 	os_window_visibility(app.window_state->handle, true);
 	
 	RendererBackend renderer_backend = renderer_backend_load(str8_lit("renderer_opengl"));
-	renderer_backend.init();
+	renderer_backend.init(app.window_state->handle);
 	
 	while (!app.is_quit)
 	{

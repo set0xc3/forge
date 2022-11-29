@@ -1,7 +1,7 @@
 #ifndef FORGE_RENDERER_H
 #define FORGE_RENDERER_H
 
-typedef void RendererInitFunction(void);
+typedef void RendererInitFunction(void *window_handle);
 typedef void RendererBeginFunction(void *window_handle);
 typedef void RendererSubmitFunction(void *window_handle);
 typedef void RendererEndFunction(void *window_handle);

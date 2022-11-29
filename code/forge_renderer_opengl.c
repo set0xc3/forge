@@ -18,9 +18,9 @@
 #endif
 
 FR_API void
-init(void)
+init(void *window_handle)
 {
-	gl_os_init();
+	gl_os_init(window_handle);
 }
 
 FR_API void 
@@ -30,7 +30,7 @@ begin(void *window_handle)
 	
 	glViewport(0, 0, 800, 600); 
 	
-	glClearColor(1.0f, 0.0f, 1.0f, 1.0f);
+	glClearColor(1.0f, 0.0f, 1.0f, 0.0f);
     glClear(GL_COLOR_BUFFER_BIT);
 }
 
@@ -38,7 +38,6 @@ FR_API void
 submit(void *window_handle)
 {
 	gl_os_select_window(window_handle);
-	glFlush();
 }
 
 FR_API void 
