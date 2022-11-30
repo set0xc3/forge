@@ -30,7 +30,7 @@ begin(void *window_handle)
 	
 	glViewport(0, 0, 800, 600); 
 	
-	glClearColor(1.0f, 0.0f, 1.0f, 0.0f);
+	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
     glClear(GL_COLOR_BUFFER_BIT);
 }
 
@@ -38,6 +38,20 @@ FR_API void
 submit(void *window_handle)
 {
 	gl_os_select_window(window_handle);
+	
+	glBegin(GL_TRIANGLES);
+	
+	glColor3f(1.0f, 0.0f, 1.0f);
+	glVertex2f(-0.5f, -0.5f);
+	glVertex2f(0.5f, -0.5f);
+	glVertex2f(0.5f, 0.5f);
+	
+	glColor3f(1.0f, 0.0f, 1.0f);
+	glVertex2f(-0.5f, -0.5f);
+	glVertex2f(-0.5f, 0.5f);
+	glVertex2f(0.5f, 0.5f);
+	
+	glEnd();
 }
 
 FR_API void 
