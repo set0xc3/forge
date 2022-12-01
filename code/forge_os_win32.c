@@ -1,12 +1,37 @@
 #include <Windows.h>
 
-void __stdcall
+// Clock
+global f64           win32_clock_frequency;
+global LARGE_INTEGER win32_start_time;
+
+internal void 
+win32_clock_init() 
+{
+    LARGE_INTEGER frequency;
+    QueryPerformanceFrequency(&frequency);
+    win32_clock_frequency = 1.0 / (f64)frequency.QuadPart;
+    QueryPerformanceCounter(&win32_start_time);
+}
+
+void WINAPI
 win32_file_io_completion_routine(DWORD error_code,
 								 DWORD number_of_bytes_transfered,
 								 LPOVERLAPPED overlapped)
 {
 	LOG_ERROR("Error code:\t%x\n", error_code);
 	LOG_INFO("Number of bytes:\t%x\n", number_of_bytes_transfered);
+}
+
+FR_API void 
+os_setup()
+{
+	win32_clock_init();
+}
+
+FR_API void 
+os_shutdown()
+{
+	
 }
 
 FR_API void
@@ -39,7 +64,8 @@ FR_API void
     return result;
 }
 
-FR_API void os_memory_release(void *memory, u64 size)
+FR_API void 
+os_memory_release(void *memory, u64 size)
 {
 	ASSERT(memory == 0 || size == 0);
 	
@@ -56,10 +82,10 @@ FR_API void os_memory_release(void *memory, u64 size)
 
 // System
 
-FR_API DebugFileState
+FR_API FileInfo
 os_file_read(String8 path)
 {
-    DebugFileState result = {0};
+    FileInfo result = {0};
 	
 	HANDLE file_handle = CreateFileA((char *)path.str,
 									 GENERIC_READ,
@@ -156,7 +182,8 @@ os_file_write(String8 path, void *memory, i32 memory_size)
     }
 }
 
-FR_API b8 os_file_is_exist(String8 path)
+FR_API b8 
+os_file_is_exist(String8 path)
 {
 	HANDLE file_handle = CreateFileA((char *)path.str,
 									 GENERIC_READ,
@@ -217,7 +244,8 @@ win32_desktop_get_rect()
     return v2i(rect.right, rect.bottom);
 }
 
-LRESULT CALLBACK win32_window_proc(HWND hwnd, UINT umsg, WPARAM wparam, LPARAM lparam)
+LRESULT CALLBACK 
+win32_window_proc(HWND hwnd, UINT umsg, WPARAM wparam, LPARAM lparam)
 {
     LRESULT result = 0;
 	
@@ -258,19 +286,25 @@ typedef struct TestObject
 }TestObject;
 
 #if FR_CONSOLE
-int main(void)
+int main(int argc, char *argv[])
 #else
 int WINAPI 
 wWinMain(HINSTANCE instance, HINSTANCE prev_instance, PWSTR cmd_line, int cmd_show)
 #endif
 {
+	LOG_DEBUG("argc: %i", argc);
+	for (i64 i = 0; i < argc; i += 1)
+	{
+		LOG_DEBUG("argv: %s", argv[i]);
+	}
+	
 	app_entry_point();
 	
 	return EXIT_SUCCESS;
 }
 
 FR_API WindowState
-* os_window_create(String8 title, Vector2i position, Vector2i size)
+*os_window_create(String8 title, Vector2i position, Vector2i size)
 {
 	HMODULE module_handle = GetModuleHandleA(0);
 	String8 window_class_name = str8_lit("Forge Class");
@@ -390,6 +424,36 @@ os_window_get_size(void* handle)
 	RECT rect;
 	GetWindowRect(handle, &rect);
 	return v2i(rect.right - rect.left, rect.bottom - rect.top);
+}
+
+FR_API f64 
+os_get_now_time()
+{
+    LARGE_INTEGER now_time;
+    QueryPerformanceCounter(&now_time);
+    return (f64)now_time.QuadPart * win32_clock_frequency;
+}
+
+FR_API void 
+os_clock_start(Clock *clock)
+{
+	clock->start_time = os_get_now_time();
+    clock->elapsed = 0;
+}
+
+FR_API void 
+os_clock_stop(Clock *clock)
+{
+	clock->start_time = 0;
+}
+
+FR_API void 
+os_clock_update(Clock *clock)
+{
+	if (clock->start_time != 0) 
+	{
+        clock->elapsed = os_get_now_time() - clock->start_time;
+    }
 }
 
 #if 0

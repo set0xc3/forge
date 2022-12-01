@@ -6,5 +6,3 @@
 #include "forge_renderer.h"
 
 #include "forge_os.h"
-
-#include "app.h"

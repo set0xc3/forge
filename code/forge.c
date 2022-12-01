@@ -1,5 +1,7 @@
 #include "forge.h"
 
+#include "app.h"
+
 #include "forge_base_types.c"
 #include "forge_array.c"
 #include "forge_linked_list.c"

@@ -1,5 +1,8 @@
 @echo off
 
+: MODE_COMPILE ARCH MODE_RENDERER
+: debug x64 vulkan
+
 echo "-------------------------"
 echo "        [Build]          "
 echo "-------------------------"
@@ -9,10 +12,11 @@ echo "-------------------------"
 
 set ROOT=%cd%
 set OUT_NAME=
+set ARCH="x64"
 set BUILD_DIR=%ROOT%\build
 set CODE_DIR=%ROOT%\code
 set MODE_COMPILE="debug"
-set ARCH="x64"
+set MODE_RENDERER="vulkan"
 
 set SOURCE=
 set INCLUDE=
@@ -32,6 +36,9 @@ if "%1"=="release" set MODE_COMPILE="release"
 if "%2"=="x32"     set ARCH="x32"
 if "%2"=="x64"     set ARCH="x64"
 
+if "%3"=="vulkan"  set MODE_RENDERER="vulkan"
+if "%3"=="opengl"  set MODE_RENDERER="opengl"
+
 if not exist %BUILD_DIR%\                      mkdir %BUILD_DIR%
 if not exist %BUILD_DIR%\%MODE_COMPILE%        mkdir %BUILD_DIR%\%MODE_COMPILE%
 if not exist %BUILD_DIR%\%MODE_COMPILE%\%ARCH% mkdir %BUILD_DIR%\%MODE_COMPILE%\%ARCH%
@@ -46,6 +53,7 @@ set OUT_NAME=forge
 set SOURCE="%CODE_DIR%\forge.c"
 set LIBS=-lKernel32.lib -lUser32.lib -lGdi32.lib
 set FLAGS=-std=c11 -O0 -w
+set FLAGS=%FLAGS% -DFR_PLATFORM_WINDOWS=1 -DFR_DYNAMIC_LINK_API=1 -DFR_CONSOLE=1
 
 if %ARCH%=="x32" set FLAGS=%FLAGS% -m32
 if %ARCH%=="x64" set FLAGS=%FLAGS% -m64
@@ -53,7 +61,9 @@ if %ARCH%=="x64" set FLAGS=%FLAGS% -m64
 if %MODE_COMPILE%=="debug"   set FLAGS=%FLAGS% -g -DFR_ENABLE_ASSERT=1 -DFR_BUILD_INTERNAL=1 -DFR_BUILD_SLOW=1
 if %MODE_COMPILE%=="release" set FLAGS=%FLAGS%
 
-set FLAGS=%FLAGS% -DFR_PLATFORM_WINDOWS=1 -DFR_DYNAMIC_LINK_API=1 -DFR_CONSOLE=1
+if %MODE_RENDERER%=="vulkan" set FLAGS=%FLAGS% -DFR_VULKAN=1
+if %MODE_RENDERER%=="opengl" set FLAGS=%FLAGS% -DFR_OPENGL=1
+
 
 : -------- executable --------
 
@@ -66,7 +76,7 @@ clang %INCLUDE% %LIBS% %FLAGS% %SOURCE% -o .\%OUT_NAME%.exe
 set OUT_NAME=sandbox
 set SOURCE="%CODE_DIR%\sandbox.c"
 
-set LIBS=-L.\ -lforge.lib
+set LIBS=-lforge.lib
 set FLAGS=-std=c11 -O0 -w
 
 if %ARCH%=="x32" set FLAGS=%FLAGS% -m32
@@ -79,10 +89,40 @@ set FLAGS=%FLAGS% -DFR_PLATFORM_WINDOWS=1 -DFR_STATIC_LINK_API=1
 
 set INCLUDE=%INCLUDE% -I"%CODE_DIR%"
 
+
 : -------- Dynamic library --------
 echo "[+] Building %OUT_NAME%.dll"
-clang  %INCLUDE% %FLAGS% %SOURCE% -c -o .\%OUT_NAME%.o
+:clang  %INCLUDE% %FLAGS% %SOURCE% -c -o .\%OUT_NAME%.o
+:clang %INCLUDE% %LIBS% %FLAGS% -shared -o .\%OUT_NAME%.dll .\%OUT_NAME%.o
+
+
+: -------- Renderer Vulkan --------
+
+set OUT_NAME=renderer_vulkan
+set SOURCE="%CODE_DIR%\forge_renderer_vulkan.c"
+
+set LIBS=-lUser32.lib -lGdi32.lib -lvulkan-1.lib -lforge.lib
+set FLAGS=-std=c11 -O0 -w
+
+if %ARCH%=="x32" set FLAGS=%FLAGS% -m32
+if %ARCH%=="x64" set FLAGS=%FLAGS% -m64
+
+if %ARCH%=="x32" set LIBS=%LIBS% -L"C:\VulkanSDK\1.3.231.1\Lib32"
+if %ARCH%=="x64" set LIBS=%LIBS% -L"C:\VulkanSDK\1.3.231.1\Lib"
+
+if %MODE_COMPILE%=="debug"   set FLAGS=%FLAGS% -g -DFR_ENABLE_ASSERT=1 -DFR_BUILD_INTERNAL=1 -DFR_BUILD_SLOW=1
+if %MODE_COMPILE%=="release" set FLAGS=%FLAGS%
+
+set FLAGS=%FLAGS% -DFR_PLATFORM_WINDOWS=1 -DFR_DYNAMIC_LINK_API=1
+
+set INCLUDE=%INCLUDE% -I"%CODE_DIR%"
+
+: -------- Dynamic library --------
+if %MODE_RENDERER%=="vulkan" (
+echo "[+] Building %OUT_NAME%.dll"
+clang %INCLUDE% %FLAGS% %SOURCE% -c -o .\%OUT_NAME%.o
 clang %INCLUDE% %LIBS% %FLAGS% -shared -o .\%OUT_NAME%.dll .\%OUT_NAME%.o
+)
 
 
 : -------- Renderer OpenGL --------
@@ -90,7 +130,7 @@ clang %INCLUDE% %LIBS% %FLAGS% -shared -o .\%OUT_NAME%.dll .\%OUT_NAME%.o
 set OUT_NAME=renderer_opengl
 set SOURCE="%CODE_DIR%\forge_renderer_opengl.c"
 
-set LIBS=-lUser32.lib -lGdi32.lib -lopengl32.lib -L.\ -lforge.lib
+set LIBS=-lUser32.lib -lGdi32.lib -lopengl32.lib -lforge.lib
 set FLAGS=-std=c11 -O0 -w
 
 if %ARCH%=="x32" set FLAGS=%FLAGS% -m32
@@ -104,8 +144,10 @@ set FLAGS=%FLAGS% -DFR_PLATFORM_WINDOWS=1 -DFR_DYNAMIC_LINK_API=1
 set INCLUDE=%INCLUDE% -I"%CODE_DIR%"
 
 : -------- Dynamic library --------
+if %MODE_RENDERER%=="opengl" (
 echo "[+] Building %OUT_NAME%.dll"
 clang  %INCLUDE% %FLAGS% %SOURCE% -c -o .\%OUT_NAME%.o
 clang %INCLUDE% %LIBS% %FLAGS% -shared -o .\%OUT_NAME%.dll .\%OUT_NAME%.o
+)
 
 popd

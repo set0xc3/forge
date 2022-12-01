@@ -3,6 +3,9 @@ global HINSTANCE gl_win32_hinstance = 0;
 global HMODULE   gl_win32_hmodule = 0;
 global HGLRC     gl_win32_ctx = 0;
 
+typedef BOOL WINAPI wgl_swap_interval_ext(i32 interval);
+global wgl_swap_interval_ext *wglSwapInterval;
+
 internal void 
 gl_os_init(void *window_handle)
 {
@@ -40,6 +43,16 @@ gl_os_init(void *window_handle)
 	if (!wglMakeCurrent(dummy_hdc, gl_win32_ctx))
 		ASSERT(true);
 	
+	wglSwapInterval = (wgl_swap_interval_ext *)wglGetProcAddress("wglSwapIntervalEXT");
+	if (wglSwapInterval)
+	{
+		wglSwapInterval(1);
+	}
+	else
+	{
+		LOG_WARNING("Get func address failed: wglSwapInterval");
+	}
+	
 	wglMakeCurrent(0, 0);
 	ReleaseDC(gl_win32_ctx, dummy_hdc);
 }
@@ -60,7 +73,8 @@ gl_os_finish(void *window_handle)
 {
 	ASSERT(window_handle == 0);
 	
-	HDC hdc = GetDC(window_handle);
+	HWND hwnd = window_handle;
+	HDC hdc = GetDC(hwnd);
 	SwapBuffers(hdc);
-	ReleaseDC(window_handle, hdc);
+	ReleaseDC(hwnd, hdc);
 }
