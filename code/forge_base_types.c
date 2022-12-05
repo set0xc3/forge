@@ -1,16 +1,3 @@
-typedef struct Node Node;
-typedef struct Node
-{
-	Node *next;
-	Node *prev;
-}Node;
-
-typedef struct LinkedList
-{
-	Node *head;
-	Node *tail;
-}LinkedList;
-
 FR_API inline Vector2i 
 v2i(i32 x, i32 y)
 {

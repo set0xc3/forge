@@ -1,3 +1,16 @@
+typedef struct Node Node;
+typedef struct Node
+{
+	Node *next;
+	Node *prev;
+}Node;
+
+typedef struct LinkedList
+{
+	Node *head;
+	Node *tail;
+}LinkedList;
+
 FR_API inline void 
 lld_remove(void *list_ptr, void *node_ptr)
 {

@@ -12,6 +12,9 @@ vk_create_pipeline(String8 vs_path, String8 fs_path)
 	
 	LOG_DEBUG("vs_dump.size: %i", vs_dump.size);
 	LOG_DEBUG("fs_dump.size: %i", fs_dump.size);
+	
+	MEMORY_FREE(vs_dump.data);
+	MEMORY_FREE(fs_dump.data);
 }
 
 FR_API void

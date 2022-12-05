@@ -292,10 +292,22 @@ int WINAPI
 wWinMain(HINSTANCE instance, HINSTANCE prev_instance, PWSTR cmd_line, int cmd_show)
 #endif
 {
+	void *array_ptr = array_reserve(512, String8);
+	
 	LOG_DEBUG("argc: %i", argc);
 	for (i64 i = 0; i < argc; i += 1)
 	{
-		LOG_DEBUG("argv: %s", argv[i]);
+		String8 *string = MEMORY_MALLOC(sizeof(String8));
+		string->str = argv[i];
+		string->size = strlen(argv[i]);
+		
+		array_push(array_ptr, string, String8);
+	}
+	
+	for (i64 i = 0; i < array_size(array_ptr); i += 1)
+	{
+		String8 string = *(String8*)array_at(array_ptr, i, String8);
+		LOG_DEBUG("arg: %s", string.str);
 	}
 	
 	app_entry_point();
