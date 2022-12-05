@@ -52,7 +52,8 @@ pushd %BUILD_DIR%\%MODE_COMPILE%\%ARCH%
 set OUT_NAME=forge
 set SOURCE="%CODE_DIR%\forge.c"
 set LIBS=-lKernel32.lib -lUser32.lib -lGdi32.lib
-set FLAGS=-std=c11 -O0 -w
+set FLAGS=-std=c11 -O0 -Wall -Wextra
+set FLAGS=%FLAGS% -Wno-unused-parameter -Wno-unused-function -Wno-unused-parameter -Wno-unused-variable -Wno-unused-but-set-variable -Wno-missing-declarations -Wno-missing-braces -Wno-implicit-function-declaration -Wno-deprecated-declarations -Wno-nonportable-include-path -Wno-ignored-pragma-intrinsic -Wno-ignored-attributes -Wno-pragma-pack -Wno-unknown-pragmas -Wno-microsoft-anon-tag
 set FLAGS=%FLAGS% -DFR_PLATFORM_WINDOWS=1 -DFR_DYNAMIC_LINK_API=1 -DFR_CONSOLE=1
 
 if %ARCH%=="x32" set FLAGS=%FLAGS% -m32
@@ -77,7 +78,8 @@ set OUT_NAME=sandbox
 set SOURCE="%CODE_DIR%\sandbox.c"
 
 set LIBS=-lforge.lib
-set FLAGS=-std=c11 -O0 -w
+set FLAGS=-std=c11 -O0 -Wall -Wextra
+set FLAGS=%FLAGS% -Wno-unused-parameter -Wno-unused-function -Wno-unused-parameter -Wno-unused-variable -Wno-unused-but-set-variable -Wno-missing-declarations -Wno-missing-braces -Wno-implicit-function-declaration -Wno-deprecated-declarations -Wno-nonportable-include-path -Wno-ignored-pragma-intrinsic -Wno-ignored-attributes -Wno-pragma-pack -Wno-unknown-pragmas -Wno-microsoft-anon-tag
 
 if %ARCH%=="x32" set FLAGS=%FLAGS% -m32
 if %ARCH%=="x64" set FLAGS=%FLAGS% -m64
@@ -91,7 +93,7 @@ set INCLUDE=%INCLUDE% -I"%CODE_DIR%"
 
 
 : -------- Dynamic library --------
-echo "[+] Building %OUT_NAME%.dll"
+:echo "[+] Building %OUT_NAME%.dll"
 :clang  %INCLUDE% %FLAGS% %SOURCE% -c -o .\%OUT_NAME%.o
 :clang %INCLUDE% %LIBS% %FLAGS% -shared -o .\%OUT_NAME%.dll .\%OUT_NAME%.o
 
@@ -102,7 +104,8 @@ set OUT_NAME=renderer_vulkan
 set SOURCE="%CODE_DIR%\forge_renderer_vulkan.c"
 
 set LIBS=-lUser32.lib -lGdi32.lib -lvulkan-1.lib -lforge.lib
-set FLAGS=-std=c11 -O0 -w
+set FLAGS=-std=c11 -O0 -Wall -Wextra
+set FLAGS=%FLAGS% -Wno-unused-parameter -Wno-unused-function -Wno-unused-parameter -Wno-unused-variable -Wno-unused-but-set-variable -Wno-missing-declarations -Wno-missing-braces -Wno-implicit-function-declaration -Wno-deprecated-declarations -Wno-nonportable-include-path -Wno-ignored-pragma-intrinsic -Wno-ignored-attributes -Wno-pragma-pack -Wno-unknown-pragmas -Wno-microsoft-anon-tag
 
 if %ARCH%=="x32" set FLAGS=%FLAGS% -m32
 if %ARCH%=="x64" set FLAGS=%FLAGS% -m64
@@ -115,6 +118,7 @@ if %MODE_COMPILE%=="release" set FLAGS=%FLAGS%
 
 set FLAGS=%FLAGS% -DFR_PLATFORM_WINDOWS=1 -DFR_DYNAMIC_LINK_API=1
 
+set INCLUDE=%INCLUDE% -I"C:\VulkanSDK\1.3.231.1\Include"
 set INCLUDE=%INCLUDE% -I"%CODE_DIR%"
 
 : -------- Dynamic library --------
@@ -131,7 +135,8 @@ set OUT_NAME=renderer_opengl
 set SOURCE="%CODE_DIR%\forge_renderer_opengl.c"
 
 set LIBS=-lUser32.lib -lGdi32.lib -lopengl32.lib -lforge.lib
-set FLAGS=-std=c11 -O0 -w
+set FLAGS=-std=c11 -O0 -Wall -Wextra
+set FLAGS=%FLAGS% -Wno-unused-parameter -Wno-unused-function -Wno-unused-parameter -Wno-unused-variable -Wno-unused-but-set-variable -Wno-missing-declarations -Wno-missing-braces -Wno-implicit-function-declaration -Wno-deprecated-declarations -Wno-nonportable-include-path -Wno-ignored-pragma-intrinsic -Wno-ignored-attributes -Wno-pragma-pack -Wno-unknown-pragmas -Wno-microsoft-anon-tag
 
 if %ARCH%=="x32" set FLAGS=%FLAGS% -m32
 if %ARCH%=="x64" set FLAGS=%FLAGS% -m64

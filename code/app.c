@@ -3,8 +3,6 @@ global AppState app;
 internal void 
 app_entry_point(void)
 {
-	logger_print_all();
-	
 	os_setup();
 	
 	app.window_state = os_window_create(str8_lit("Forge"), v2i(0, 0), v2i(800, 600));

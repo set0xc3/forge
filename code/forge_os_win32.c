@@ -103,7 +103,7 @@ os_file_read(String8 path)
 			ASSERT(size32 >= i32_MAX);
 			
             result.size = size32;
-            result.data = MEMORY_MALLOC(result.size);
+            result.data = os_memory_reserve(result.size);
             DWORD file_bytes_read = 0;
             if (ReadFile(
 						 file_handle,
@@ -145,6 +145,8 @@ os_file_read(String8 path)
 FR_API b8 
 os_file_write(String8 path, void *memory, i32 memory_size)
 {
+	// TODO
+#if 0
     HANDLE file_handle = CreateFileA((char *)path.str,
 									 GENERIC_WRITE,
 									 FILE_SHARE_READ,
@@ -155,8 +157,7 @@ os_file_write(String8 path, void *memory, i32 memory_size)
     if (file_handle != INVALID_HANDLE_VALUE)
     {
 		i32 file_bytes_write = 0;
-        if (WriteFile(
-					  file_handle,
+        if (WriteFile(file_handle,
 					  memory,
 					  memory_size,
 					  &file_bytes_write,
@@ -180,6 +181,8 @@ os_file_write(String8 path, void *memory, i32 memory_size)
         CloseHandle(file_handle);
         return false;
     }
+#endif
+	return 0;
 }
 
 FR_API b8 
@@ -294,20 +297,20 @@ wWinMain(HINSTANCE instance, HINSTANCE prev_instance, PWSTR cmd_line, int cmd_sh
 {
 	void *array_ptr = array_reserve(512, String8);
 	
-	LOG_DEBUG("argc: %i", argc);
+	LOG_INFO("argc: %i", argc);
 	for (i64 i = 0; i < argc; i += 1)
 	{
 		String8 *string = MEMORY_MALLOC(sizeof(String8));
-		string->str = argv[i];
+		string->str = (u8 *)argv[i];
 		string->size = strlen(argv[i]);
 		
 		array_push(array_ptr, string, String8);
 	}
 	
-	for (i64 i = 0; i < array_size(array_ptr); i += 1)
+	for (u64 i = 0; i < array_size(array_ptr); i += 1)
 	{
 		String8 string = *(String8*)array_at(array_ptr, i, String8);
-		LOG_DEBUG("arg: %s", string.str);
+		LOG_INFO("arg: %s", string.str);
 	}
 	
 	app_entry_point();
