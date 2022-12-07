@@ -16,7 +16,7 @@ logger_print(const char* type, const char* fmt, ...)
 }
 
 internal void 
-logger_print_all()
+logger_print_all(void)
 {
 	LOG_INFO("Test: %i", 123);
 	LOG_DEBUG("Test: %i", 123);

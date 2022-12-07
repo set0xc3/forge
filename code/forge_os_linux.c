@@ -46,7 +46,7 @@ global OS_Context *os_ctx;
 global OS_EventList *os_events;
 
 FR_API void 
-os_init()
+os_init(void)
 {
 	os_events = (OS_EventList *)MEMORY_MALLOC(sizeof(OS_EventList));
 	MEMORY_ZERO_STRUCT(os_events, sizeof(OS_EventList));
@@ -56,7 +56,7 @@ os_init()
 }
 
 FR_API OS_Event 
-*os_get_next_event()
+*os_get_next_event(void)
 {
 	OS_Event *event = os_events->head;
 	if (event)

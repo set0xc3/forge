@@ -33,8 +33,8 @@ f_array_destroy(void *array_ptr)
 	ASSERT(array_ptr == 0);
 	FArray *array = array_ptr;
 	
-	os_memory_release(array->data, array->capacity);
-	os_memory_release(array, sizeof(FArray));
+	os_memory_release(array->data);
+	os_memory_release(array);
 }
 
 FR_API u64 f_array_size(void *array_ptr)

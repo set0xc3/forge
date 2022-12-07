@@ -7,7 +7,7 @@ typedef struct String8
 	u64 size;
 }String8;
 
-FR_API String8 str8(u8 *str, u32 size);
+FR_API String8 str8(u8 *str, u64 size);
 #define str8_lit(s) str8((u8 *)s, sizeof(s) - 1)
 
 FR_API String8 string_remove_path(const String8 path);

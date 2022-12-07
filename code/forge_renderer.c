@@ -1,5 +1,5 @@
 internal RendererBackend
-renderer_backend_load()
+renderer_backend_load(void)
 {
 	String8 renderer_path = {0};
 #if FR_VULKAN

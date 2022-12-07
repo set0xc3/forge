@@ -21,11 +21,11 @@ typedef struct Clock
 	f64 elapsed;
 }Clock;
 
-FR_API void          os_setup();
-FR_API void          os_shutdown();
+FR_API void          os_setup(void);
+FR_API void          os_shutdown(void);
 
 FR_API void         *os_memory_reserve(u64 size);
-FR_API void          os_memory_release(void *memory, u64 size);
+FR_API void          os_memory_release(void *memory);
 
 FR_API void          os_sleep(u32 milliseconds);
 
@@ -45,7 +45,7 @@ FR_API void          os_window_visibility(void* handle, b32 state);
 FR_API Vector2i      os_window_get_position(void* handle);
 FR_API Vector2i      os_window_get_size(void* handle);
 
-FR_API f64           os_get_now_time();
+FR_API f64           os_get_now_time(void);
 
 FR_API void          os_clock_start(Clock *clock);
 FR_API void          os_clock_stop(Clock *clock);

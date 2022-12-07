@@ -2,7 +2,7 @@
 #define LOGGER_H
 
 FR_API void logger_print(const char* type, const char* fmt, ...);
-internal void logger_print_all();
+internal void logger_print_all(void);
 
 #define LOG_INFO(...)    logger_print("[INFO] ", ##__VA_ARGS__)
 #if FR_BUILD_SLOW

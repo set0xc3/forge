@@ -15,7 +15,7 @@ typedef struct RendererBackend
 	RendererEndFunction    *end;
 }RendererBackend;
 
-internal RendererBackend renderer_backend_load();
+internal RendererBackend renderer_backend_load(void);
 internal void renderer_backend_unload(RendererBackend backend);
 
 #endif //FORGE_RENDERER_H

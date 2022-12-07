@@ -1,8 +1,4 @@
-#include <forge_base_types.h>
-#include <forge_string.h>
-#include <forge_logger.h>
-
-#include <forge_os.h>
+#include <forge.h>
 
 #include <vulkan/vulkan.h>
 #include "forge_renderer_vulkan.h"
@@ -21,7 +17,7 @@ global_const b8 enable_validation_layers = false;
 #endif
 
 internal void 
-vk_create_instance()
+vk_create_instance(void)
 {
     VkApplicationInfo app_info  = {0};
     app_info.sType              = VK_STRUCTURE_TYPE_APPLICATION_INFO;
@@ -83,7 +79,7 @@ vk_create_instance()
 		ASSERT(true);
 	}
 	
-	os_memory_release(ep, ep_size);
+	os_memory_release(ep);
 }
 
 internal void 
@@ -95,12 +91,12 @@ vk_create_pipeline(String8 vs_path, String8 fs_path)
 	LOG_INFO("vs_dump.size: %u", vs_dump.size);
 	LOG_INFO("fs_dump.size: %u", fs_dump.size);
 	
-	MEMORY_FREE(vs_dump.data);
-	MEMORY_FREE(fs_dump.data);
+	os_memory_release(vs_dump.data);
+	os_memory_release(fs_dump.data);
 }
 
 internal void 
-vk_pick_physical_device()
+vk_pick_physical_device(void)
 {
 	vkEnumeratePhysicalDevices(vk_instance, &vk_physical_devices_count, 0);
 	LOG_INFO("vk.physical.device.count: %u", vk_physical_devices_count);
@@ -133,13 +129,13 @@ vk_is_device_suitable(VkPhysicalDevice *device)
 FR_API void
 init(void *window_handle)
 {
-	LOG_INFO("Vulkan init:");
+	LOG_INFO("[VULKAN] init");
 	
 	vk_create_instance();
 	vk_pick_physical_device();
 	
-	vk_create_pipeline(str8_lit("D:\\dev\\forge\\assets\\shaders\\shader.vert.spv"),
-					   str8_lit("D:\\dev\\forge\\assets\\shaders\\shader.frag.spv"));
+	vk_create_pipeline(str8_lit("assets/shaders/shader.vert.spv"),
+					   str8_lit("assets/shaders/shader.frag.spv"));
 }
 
 FR_API void 

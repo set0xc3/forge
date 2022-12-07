@@ -2,15 +2,13 @@
 
 // Clock
 global f64           win32_clock_frequency;
-global LARGE_INTEGER win32_start_time;
 
 internal void 
-win32_clock_init() 
+win32_clock_init(void) 
 {
     LARGE_INTEGER frequency;
     QueryPerformanceFrequency(&frequency);
     win32_clock_frequency = 1.0 / (f64)frequency.QuadPart;
-    QueryPerformanceCounter(&win32_start_time);
 }
 
 void WINAPI
@@ -23,13 +21,13 @@ win32_file_io_completion_routine(DWORD error_code,
 }
 
 FR_API void 
-os_setup()
+os_setup(void)
 {
 	win32_clock_init();
 }
 
 FR_API void 
-os_shutdown()
+os_shutdown(void)
 {
 	
 }
@@ -65,9 +63,9 @@ FR_API void
 }
 
 FR_API void 
-os_memory_release(void *memory, u64 size)
+os_memory_release(void *memory)
 {
-	ASSERT(memory == 0 || size == 0);
+	ASSERT(memory == 0);
 	
 	if (VirtualFree(memory, 0, MEM_RELEASE))
 	{
@@ -105,8 +103,7 @@ os_file_read(String8 path)
             result.size = size32;
             result.data = os_memory_reserve(result.size);
             DWORD file_bytes_read = 0;
-            if (ReadFile(
-						 file_handle,
+            if (ReadFile(file_handle,
 						 result.data,
 						 result.size,
 						 &file_bytes_read,
@@ -239,7 +236,7 @@ os_library_unload(void* handle)
 // Window
 
 internal Vector2i
-win32_desktop_get_rect()
+win32_desktop_get_rect(void)
 {
     RECT rect;
     HWND desktop = GetDesktopWindow();
@@ -262,7 +259,7 @@ win32_window_proc(HWND hwnd, UINT umsg, WPARAM wparam, LPARAM lparam)
 		}
 		case WM_PAINT:
 		{
-#if 0
+#if 1
 			String8 greeting = str8_lit("Hello, World!");
 			PAINTSTRUCT ps;
 			HDC hdc = BeginPaint(hwnd, &ps);
@@ -283,10 +280,17 @@ win32_window_proc(HWND hwnd, UINT umsg, WPARAM wparam, LPARAM lparam)
     return result;
 }
 
-typedef struct TestObject
+typedef void GameStartFunction(void);
+typedef void GameUpdateFunction(f32 delta_time);
+typedef void GameStopFunction(void);
+
+typedef struct GameBackend
 {
-	u64 id;
-}TestObject;
+	void               *libray_handle;
+	GameStartFunction  *start;
+	GameUpdateFunction *update;
+	GameStopFunction   *stop;
+}GameBackend;
 
 #if FR_CONSOLE
 int main(int argc, char *argv[])
@@ -295,25 +299,132 @@ int WINAPI
 wWinMain(HINSTANCE instance, HINSTANCE prev_instance, PWSTR cmd_line, int cmd_show)
 #endif
 {
-	void *array_ptr = array_reserve(512, String8);
+	b8 is_quit = false;
+	WindowState *window_state = 0;
+	GameBackend game_backend = {0};
+	
+	void *array_ptr = array_reserve(argc, String8);
 	
 	LOG_INFO("argc: %i", argc);
-	for (i64 i = 0; i < argc; i += 1)
+	for (i32 i = 0; i < argc; i += 1)
 	{
-		String8 *string = MEMORY_MALLOC(sizeof(String8));
+		String8 *string = os_memory_reserve(sizeof(String8));
 		string->str = (u8 *)argv[i];
 		string->size = strlen(argv[i]);
 		
 		array_push(array_ptr, string, String8);
 	}
 	
-	for (u64 i = 0; i < array_size(array_ptr); i += 1)
+	for (u32 i = 0; i < array_size(array_ptr); i += 1)
 	{
 		String8 string = *(String8*)array_at(array_ptr, i, String8);
 		LOG_INFO("arg: %s", string.str);
 	}
 	
-	app_entry_point();
+	os_setup();
+	
+	window_state = os_window_create(str8_lit("Forge"), v2i(0, 0), v2i(800, 600));
+	os_window_visibility(window_state->handle, true);
+	
+	RendererBackend renderer_backend = renderer_backend_load();
+	renderer_backend.init(window_state->handle);
+	
+	game_backend.libray_handle = os_library_load(str8_lit("game"));
+	game_backend.start         = (GameStartFunction *)  os_library_load_symbol(game_backend.libray_handle, str8_lit("start"));
+	game_backend.update        = (GameUpdateFunction *) os_library_load_symbol(game_backend.libray_handle, str8_lit("update"));
+	game_backend.stop          = (GameStopFunction *)   os_library_load_symbol(game_backend.libray_handle, str8_lit("stop"));
+	
+	// Start Modules
+	{
+		game_backend.start();
+	}
+	
+	f32 fps_max = 60.0f;
+	f32 period_max = 1.0f / fps_max;
+	
+	f64 begin_ticks = os_get_now_time();
+	f64 end_ticks = 0;
+	end_ticks  = os_get_now_time();
+	
+	LARGE_INTEGER perf_count_frequency_result;
+    QueryPerformanceFrequency(&perf_count_frequency_result);
+	f64 perf_count_frequency = perf_count_frequency_result.QuadPart;
+	
+	LARGE_INTEGER last_counter;
+	f64 last_cycle_count;
+	
+	LARGE_INTEGER end_counter;
+	QueryPerformanceCounter(&end_counter);
+	last_counter = end_counter;
+	
+	while (!is_quit)
+	{
+		f64 end_cycle_count = (f64)__rdtsc();
+		QueryPerformanceCounter(&end_counter);
+		
+		f64 cycles_elapsed  = (f64)end_cycle_count - last_cycle_count;
+		f64 counter_elapsed = (f64)end_counter.QuadPart - last_counter.QuadPart;
+		f32 ms_per_frame    = (f32)counter_elapsed / (f32)perf_count_frequency;
+		f32 fps             = (f32)perf_count_frequency / (f32)counter_elapsed;
+		f32 mcpf            = (f32)cycles_elapsed / 1000000.0f;
+		
+#if 0
+		LOG_TRACE("period_max:           %f", (f32)period_max);
+		
+		LOG_TRACE("perf_count_frequency: %f", (f32)perf_count_frequency);
+		
+		LOG_TRACE("end_counter:          %f", (f64)end_counter.QuadPart);
+		LOG_TRACE("last_counter:         %f", (f64)last_counter.QuadPart);
+		
+		LOG_TRACE("end_cycle_count:      %f", (f64)end_cycle_count);
+		LOG_TRACE("last_cycle_count:     %f", (f64)last_cycle_count);
+		
+		LOG_TRACE("cycles_elapsed:       %f", (f64)cycles_elapsed);
+		LOG_TRACE("counter_elapsed:      %f", (f64)counter_elapsed);
+		LOG_TRACE("ms_per_frame:         %f", (f32)ms_per_frame);
+		LOG_TRACE("fps:                  %f", (f32)fps);
+		LOG_TRACE("mcpf:                 %f", (f32)mcpf);
+#endif
+		
+#if 1
+		if (ms_per_frame >= period_max)
+#endif
+		{
+			if (ms_per_frame >= 1.0f)
+			{
+				ms_per_frame = period_max;
+			}
+			
+			if (!os_window_process_event(window_state->handle))
+			{
+				is_quit = true;
+			}
+			
+			// Update Modules
+			{
+				game_backend.update(ms_per_frame);
+			}
+			
+			//for (u64 i = 0; i < 1000000; i++)
+			{
+				renderer_backend.begin(window_state->handle);
+				renderer_backend.submit(window_state->handle);
+				renderer_backend.end(window_state->handle);
+			}
+			
+			LOG_TRACE("[OS] fps: %.02ff/s, %.02fms/f, %.02fmc/f, %.02f/ghz/f", fps, ms_per_frame, mcpf, fps * mcpf);
+			
+			last_counter = end_counter;
+			last_cycle_count = end_cycle_count;
+		}
+	}
+	
+	// Stop Modules
+	{
+		game_backend.stop();
+	}
+	
+	os_shutdown();
 	
 	return EXIT_SUCCESS;
 }
@@ -367,22 +478,16 @@ FR_API WindowState
 	
 	// Create the window.
 	{
-		win->handle = CreateWindowExA(0,                    	// Optional window styles.
-									  wnd.lpszClassName,   	// Window class
-									  (LPCSTR)title.str, 		// Window text
-									  WS_OVERLAPPEDWINDOW, 	// Window style
+		win->handle = CreateWindowExA(0, wnd.lpszClassName,
+									  (LPCSTR)title.str,
+									  WS_OVERLAPPEDWINDOW,
 									  
-									  // Size and position
 									  win->position.x,
 									  win->position.y,
 									  win->size.x,
 									  win->size.y,
 									  
-									  0, // Parent window    
-									  0, // Menu
-									  module_handle, // Instance handle
-									  0  // Additional application data
-									  );
+									  0, 0, module_handle, 0);
 		ASSERT(win->handle == 0);
 	}
 	
@@ -442,9 +547,9 @@ os_window_get_size(void* handle)
 }
 
 FR_API f64 
-os_get_now_time()
+os_get_now_time(void)
 {
-    LARGE_INTEGER now_time;
+	LARGE_INTEGER now_time;
     QueryPerformanceCounter(&now_time);
     return (f64)now_time.QuadPart * win32_clock_frequency;
 }
