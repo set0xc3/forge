@@ -1,7 +1,7 @@
 #include <forge_types.h>
 #include <forge_logger.h>
 
-#include "game.h"
+#include "forge_game.h"
 
 FR_API void 
 start(void)

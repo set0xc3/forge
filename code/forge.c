@@ -1,4 +1,7 @@
 #include "forge.h"
+
+#include "forge_app.h"
+
 #include "forge_vector.c"
 #include "forge_array.c"
 #include "forge_linked_list.c"
@@ -14,3 +17,5 @@
 #else
 #error missing platform detection
 #endif
+
+#include "forge_app.c"

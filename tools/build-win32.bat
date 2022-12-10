@@ -75,7 +75,7 @@ clang %INCLUDE% %LIBS% %FLAGS% %SOURCE% -o .\%OUT_NAME%.exe
 : -------- Game --------
 
 set OUT_NAME=game
-set SOURCE="%CODE_DIR%\game.c"
+set SOURCE="%CODE_DIR%\forge_game.c"
 
 set LIBS=-lforge.lib
 set FLAGS=-std=c11 -O0 -Wall -Wextra
