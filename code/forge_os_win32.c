@@ -1,16 +1,5 @@
 #include <Windows.h>
 
-// Clock
-global f64           win32_clock_frequency;
-
-internal void 
-win32_clock_init(void) 
-{
-    LARGE_INTEGER frequency;
-    QueryPerformanceFrequency(&frequency);
-    win32_clock_frequency = 1.0 / (f64)frequency.QuadPart;
-}
-
 void WINAPI
 win32_file_io_completion_routine(DWORD error_code,
 								 DWORD number_of_bytes_transfered,
@@ -23,7 +12,6 @@ win32_file_io_completion_routine(DWORD error_code,
 FR_API void 
 os_setup(void)
 {
-	win32_clock_init();
 }
 
 FR_API void 
@@ -410,40 +398,22 @@ os_window_get_size(void* handle)
 }
 
 FR_API f64 
-os_get_now_time(void)
+os_time_now(void)
 {
-	LARGE_INTEGER now_time;
-    QueryPerformanceCounter(&now_time);
-    return (f64)now_time.QuadPart * win32_clock_frequency;
+	LARGE_INTEGER result;
+    QueryPerformanceCounter(&result);
+    return (f64)result.QuadPart;
 }
 
-FR_API void 
-os_clock_start(Clock *clock)
+FR_API f64 
+os_time_frequency(void)
 {
-	clock->start_time = os_get_now_time();
-    clock->elapsed = 0;
-}
-
-FR_API void 
-os_clock_stop(Clock *clock)
-{
-	clock->start_time = 0;
-}
-
-FR_API void 
-os_clock_update(Clock *clock)
-{
-	if (clock->start_time != 0) 
+	LARGE_INTEGER result;
+	local b8 is_init = false;
+	if (!is_init)
 	{
-        clock->elapsed = os_get_now_time() - clock->start_time;
-    }
+		QueryPerformanceFrequency(&result);
+		is_init = true;
+	}
+	return (f64)result.QuadPart;
 }
-
-#if 0
-WIN32_FILE_ATTRIBUTE_DATA file_info = {0};
-is_error = GetFileAttributesExA(path,
-								GetFileExInfoStandard,
-								&file_info
-								);
-ASSERT(is_error == 0);
-#endif

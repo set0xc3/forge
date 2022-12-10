@@ -22,51 +22,21 @@ app_run(void)
 		app_state.game_backend.start();
 	}
 	
-	f32 fps_max     = 60.0f;
-	f32 period_max  = 1.0f / fps_max;
+	local_const f32 fps_max        = 60.0f;
+	local_const f32 period_max     = 1.0f / fps_max;
+	const f64 perf_count_frequency = os_time_frequency();
 	
-	f64 begin_ticks = os_get_now_time();
-	f64 end_ticks   = 0;
-	end_ticks       = os_get_now_time();
-	
-	LARGE_INTEGER perf_count_frequency_result;
-    QueryPerformanceFrequency(&perf_count_frequency_result);
-	f64 perf_count_frequency = perf_count_frequency_result.QuadPart;
-	
-	LARGE_INTEGER last_counter;
-	f64 last_cycle_count;
-	
-	LARGE_INTEGER end_counter;
-	QueryPerformanceCounter(&end_counter);
-	last_counter = end_counter;
+	u64 begin_counter  = os_time_now();
+	u64 end_counter = 0;
 	
 	while (!app_state.is_quit)
 	{
-		f64 end_cycle_count = (f64)__rdtsc();
-		QueryPerformanceCounter(&end_counter);
+		begin_counter       = os_time_now();
 		
-		f64 cycles_elapsed  = (f64)end_cycle_count - last_cycle_count;
-		f64 counter_elapsed = (f64)end_counter.QuadPart - last_counter.QuadPart;
-		f32 ms_per_frame    = (f32)counter_elapsed / (f32)perf_count_frequency;
-		f32 fps             = (f32)perf_count_frequency / (f32)counter_elapsed;
-		f32 mcpf            = (f32)cycles_elapsed / 1000000.0f;
-		
+		f64 counter_elapsed = (f64)(begin_counter - end_counter);
+		f32 ms_per_frame    = (f32)(counter_elapsed / perf_count_frequency);
+		f32 fps             = (f32)(perf_count_frequency / counter_elapsed);
 #if 0
-		LOG_TRACE("period_max:           %f", (f32)period_max);
-		
-		LOG_TRACE("perf_count_frequency: %f", (f32)perf_count_frequency);
-		
-		LOG_TRACE("end_counter:          %f", (f64)end_counter.QuadPart);
-		LOG_TRACE("last_counter:         %f", (f64)last_counter.QuadPart);
-		
-		LOG_TRACE("end_cycle_count:      %f", (f64)end_cycle_count);
-		LOG_TRACE("last_cycle_count:     %f", (f64)last_cycle_count);
-		
-		LOG_TRACE("cycles_elapsed:       %f", (f64)cycles_elapsed);
-		LOG_TRACE("counter_elapsed:      %f", (f64)counter_elapsed);
-		LOG_TRACE("ms_per_frame:         %f", (f32)ms_per_frame);
-		LOG_TRACE("fps:                  %f", (f32)fps);
-		LOG_TRACE("mcpf:                 %f", (f32)mcpf);
 #endif
 		
 #if 1
@@ -95,10 +65,17 @@ app_run(void)
 				renderer_backend.end(app_state.window_state->handle);
 			}
 			
-			//LOG_TRACE("[OS] fps: %.02ff/s, %.02fms/f, %.02fmc/f, %.02f/ghz/f", fps, ms_per_frame, mcpf, fps * mcpf);
+			{
+				static f64 frame_per_sec = 0;
+				frame_per_sec += ms_per_frame;
+				if (frame_per_sec >= 1.0f)
+				{
+					LOG_TRACE("[OS] fps: %.02ff/s, %.02fms/f", (f32)fps, ms_per_frame);
+					frame_per_sec = 0;
+				}
+			}
 			
-			last_counter = end_counter;
-			last_cycle_count = end_cycle_count;
+			end_counter = begin_counter;
 		}
 	}
 	

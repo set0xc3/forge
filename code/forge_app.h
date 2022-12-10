@@ -17,7 +17,7 @@ typedef struct AppState
 {
 	b8 is_quit;
 	WindowState *window_state;
-	GameBackend game_backend;
+	GameBackend  game_backend;
 }AppState;
 
 internal void app_run(void);

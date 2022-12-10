@@ -15,12 +15,6 @@ typedef struct WindowState
 	Vector2i position;
 }WindowState;
 
-typedef struct Clock
-{
-	f64 start_time;
-	f64 elapsed;
-}Clock;
-
 FR_API void          os_setup(void);
 FR_API void          os_shutdown(void);
 
@@ -45,10 +39,7 @@ FR_API void          os_window_visibility(void* handle, b32 state);
 FR_API Vector2i      os_window_get_position(void* handle);
 FR_API Vector2i      os_window_get_size(void* handle);
 
-FR_API f64           os_get_now_time(void);
-
-FR_API void          os_clock_start(Clock *clock);
-FR_API void          os_clock_stop(Clock *clock);
-FR_API void          os_clock_update(Clock *clock);
+FR_API f64           os_time_now(void);
+FR_API f64           os_time_frequency(void);
 
 #endif //OS_H
