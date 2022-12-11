@@ -1,0 +1,20 @@
+
+GL_FUNC(glUseProgram, void, (GLuint program))
+GL_FUNC(glGenBuffers, void, (GLsizei n, GLuint *buffers))
+GL_FUNC(glBindBuffer, void, (GLenum target, GLuint buffer))
+GL_FUNC(glBufferData, void, (GLenum target, GLsizeiptr size, const void *data, GLenum usage))
+GL_FUNC(glCreateShader, GLuint, (GLenum type))
+GL_FUNC(glShaderSource, void, (GLuint shader, GLsizei count, const GLchar *const*string, const GLint *length))
+GL_FUNC(glCompileShader, void, (GLuint shader))
+GL_FUNC(glGetShaderiv, void, (GLuint shader, GLenum pname, GLint *params))
+GL_FUNC(glGetShaderInfoLog, void, (GLuint shader, GLsizei bufSize, GLsizei *length, GLchar *infoLog))
+GL_FUNC(glCreateProgram, GLuint, (void))
+GL_FUNC(glAttachShader, void, (GLuint program, GLuint shader))
+GL_FUNC(glLinkProgram, void, (GLuint program))
+GL_FUNC(glDeleteShader, void, (GLuint shader))
+GL_FUNC(glVertexAttribPointer, void, (GLuint index, GLint size, GLenum type, GLboolean normalized, GLsizei stride, const void *pointer))
+GL_FUNC(glEnableVertexAttribArray, void, (GLuint index))
+GL_FUNC(glBindVertexArray, void, (GLuint array))
+GL_FUNC(glGenVertexArrays, void, (GLsizei n, GLuint *arrays))
+
+#undef GL_FUNC

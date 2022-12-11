@@ -23,7 +23,7 @@ FR_API void          os_memory_release(void *memory);
 
 FR_API void          os_sleep(u32 milliseconds);
 
-FR_API FileInfo      os_file_read(String8 path); /* function allocated memory */
+FR_API String8       os_file_read(String8 path);
 FR_API b8            os_file_write(String8 path, void *memory, i32 memory_size);
 FR_API b8            os_file_is_exist(String8 path);
 

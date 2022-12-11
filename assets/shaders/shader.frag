@@ -1,9 +1,11 @@
-#version 450
+#version 330 core
 
 layout (location = 0) out vec4 out_color;
+
+in vec3 our_color;
 
 void 
 main(void)
 {
-  out_color = vec4(1.0f, 0.0f, 1.0f, 1.0f);
+    out_color = vec4(our_color.x, our_color.y, our_color.z, 1.0f);
 }

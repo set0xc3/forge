@@ -58,7 +58,6 @@ app_run(void)
 				app_state.game_backend.update(ms_per_frame);
 			}
 			
-			//for (u64 i = 0; i < 1000000; i++)
 			{
 				renderer_backend.begin(app_state.window_state->handle);
 				renderer_backend.submit(app_state.window_state->handle);
@@ -70,7 +69,7 @@ app_run(void)
 				frame_per_sec += ms_per_frame;
 				if (frame_per_sec >= 1.0f)
 				{
-					LOG_TRACE("[OS] fps: %.02ff/s, %.02fms/f", (f32)fps, ms_per_frame);
+					LOG_TRACE("[APP] fps: %.02ff/s, %.02fms/f", (f32)fps, ms_per_frame);
 					frame_per_sec = 0;
 				}
 			}

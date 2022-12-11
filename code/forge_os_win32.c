@@ -69,63 +69,22 @@ os_memory_release(void *memory)
 
 // System
 
-FR_API FileInfo
+FR_API String8
 os_file_read(String8 path)
 {
-    FileInfo result = {0};
-	
-	HANDLE file_handle = CreateFileA((char *)path.str,
-									 GENERIC_READ,
-									 FILE_SHARE_READ,
-									 0,
-									 OPEN_EXISTING,
-									 0,
-									 0);
-    if (file_handle != INVALID_HANDLE_VALUE) 
+    String8 result = {0};
+    FILE *file = fopen((char *)path.str , "r");
+    if (file != 0)
     {
-        LARGE_INTEGER tmp_size = {0}; 
-        if ((GetFileSizeEx(file_handle, &tmp_size)))
-        {
-			i32 size32 = (i32)tmp_size.QuadPart;
-			ASSERT(size32 >= i32_MAX);
-			
-            result.size = size32;
-            result.data = os_memory_reserve(result.size);
-            DWORD file_bytes_read = 0;
-            if (ReadFile(file_handle,
-						 result.data,
-						 result.size,
-						 &file_bytes_read,
-						 0) && (DWORD)result.size == file_bytes_read)
-            {
-                return result;
-            }
-            else
-            {
-                ASSERT(true);
-                LOG_ERROR("Read file failed");
-                MEMORY_FREE(result.data);
-                CloseHandle(file_handle);
-                result.size = 0;
-                result.data = 0;
-                return result;
-            }
-        }
-        else
-        {
-            ASSERT(true);
-            LOG_ERROR("Get file size failed");
-            CloseHandle(file_handle);
-            return result;
-        }
+        fseek(file, 0, SEEK_END);
+        result.size = ftell(file) - 1;
+        result.str = (u8 *)os_memory_reserve(result.size);
+        fseek(file, 0, SEEK_SET);
+        fread(result.str, 1, result.size, file);
+        result.str[result.size - 1] = 0;
+        fclose(file);
     }
-    else
-	{
-        ASSERT(true);
-        LOG_ERROR("Open file failed");
-        CloseHandle(file_handle);
-        return result;
-    }
+    return result;
 }
 
 FR_API b8 

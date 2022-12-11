@@ -16,7 +16,7 @@ set ARCH="x64"
 set BUILD_DIR=%ROOT%\build
 set CODE_DIR=%ROOT%\code
 set MODE_COMPILE="debug"
-set MODE_RENDERER="vulkan"
+set MODE_RENDERER="opengl"
 
 set SOURCE=
 set INCLUDE=
@@ -60,7 +60,7 @@ if %ARCH%=="x32" set FLAGS=%FLAGS% -m32
 if %ARCH%=="x64" set FLAGS=%FLAGS% -m64
 
 if %MODE_COMPILE%=="debug"   set FLAGS=%FLAGS% -g -DFR_ENABLE_ASSERT=1 -DFR_BUILD_INTERNAL=1 -DFR_BUILD_SLOW=1
-if %MODE_COMPILE%=="release" set FLAGS=%FLAGS% -O2  -DFR_BUILD_SLOW=1
+if %MODE_COMPILE%=="release" set FLAGS=%FLAGS% -O2 -DFR_BUILD_SLOW=1
 
 if %MODE_RENDERER%=="vulkan" set FLAGS=%FLAGS% -DFR_VULKAN=1
 if %MODE_RENDERER%=="opengl" set FLAGS=%FLAGS% -DFR_OPENGL=1
@@ -136,7 +136,7 @@ set SOURCE="%CODE_DIR%\forge_renderer_opengl.c"
 
 set LIBS=-lUser32.lib -lGdi32.lib -lopengl32.lib -lforge.lib
 set FLAGS=-std=c11 -O0 -Wall -Wextra
-set FLAGS=%FLAGS% -Wno-unused-parameter -Wno-unused-function -Wno-unused-parameter -Wno-unused-variable -Wno-unused-but-set-variable -Wno-missing-declarations -Wno-missing-braces -Wno-implicit-function-declaration -Wno-deprecated-declarations -Wno-nonportable-include-path -Wno-ignored-pragma-intrinsic -Wno-ignored-attributes -Wno-pragma-pack -Wno-unknown-pragmas -Wno-microsoft-anon-tag
+set FLAGS=%FLAGS% -Wno-unused-parameter -Wno-unused-function -Wno-unused-parameter -Wno-unused-variable -Wno-unused-but-set-variable -Wno-missing-declarations -Wno-missing-braces -Wno-implicit-function-declaration -Wno-deprecated-declarations -Wno-nonportable-include-path -Wno-ignored-pragma-intrinsic -Wno-ignored-attributes -Wno-pragma-pack -Wno-unknown-pragmas -Wno-microsoft-anon-tag -Wno-macro-redefined
 
 if %ARCH%=="x32" set FLAGS=%FLAGS% -m32
 if %ARCH%=="x64" set FLAGS=%FLAGS% -m64
@@ -146,6 +146,7 @@ if %MODE_COMPILE%=="release" set FLAGS=%FLAGS% -O2
 
 set FLAGS=%FLAGS% -DFR_PLATFORM_WINDOWS=1 -DFR_DYNAMIC_LINK_API=1
 
+set INCLUDE=%INCLUDE% -I"%ROOT%\third-party\gl"
 set INCLUDE=%INCLUDE% -I"%CODE_DIR%"
 
 : -------- Dynamic library --------

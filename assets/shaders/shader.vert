@@ -1,14 +1,13 @@
-#version 450
+#version 330 core
 
-vec2 position[3] = vec2[]
-(
-  vec2(0.0f, -0.5f),
-  vec2(0.5f, 0.5f),
-  vec2(-0.5, 0.5f)
-);
+layout (location = 0) in vec3 a_pos;
+layout (location = 1) in vec3 a_color;
+
+out vec3 our_color;
 
 void 
 main(void)
 {
-  gl_Position = vec4(position[gl_VertexIndex], 0.0f, 1.0f);
+    gl_Position = vec4(a_pos.x, a_pos.y, a_pos.z, 1.0f);
+	our_color = a_color;
 }

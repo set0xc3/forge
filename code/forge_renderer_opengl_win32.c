@@ -1,10 +1,25 @@
-global HDC       gl_win32_pixel_format = 0;
-global HINSTANCE gl_win32_hinstance = 0;
-global HMODULE   gl_win32_hmodule = 0;
-global HGLRC     gl_win32_ctx = 0;
+global HINSTANCE win32_hinstance = 0;
+global HMODULE   win32_gl_hmodule = 0;
+global HGLRC     win32_gl_ctx = 0;
 
-typedef BOOL WINAPI wgl_swap_interval_ext(i32 interval);
-global wgl_swap_interval_ext *wglSwapInterval;
+typedef BOOL __stdcall wglSwapIntervalEXTFunction(int interval);
+global wglSwapIntervalEXTFunction *wglSwapIntervalEXT = 0;
+
+internal void 
+*win32_get_gl_func_address(HMODULE module, const char *name)
+{
+	void *p = (void *)wglGetProcAddress(name);
+	if(p == 0 ||
+	   p == (void*)0x1 || 
+	   p == (void*)0x2 || 
+	   p == (void*)0x3 ||
+	   p == (void*)-1)
+	{
+		p = (void *)GetProcAddress(module, name);
+	}
+	
+	return p;
+}
 
 internal void 
 gl_os_init(void *window_handle)
@@ -13,8 +28,8 @@ gl_os_init(void *window_handle)
 	
 	HWND hwnd = window_handle;
 	
-	gl_win32_hinstance = GetModuleHandleA(0);
-	gl_win32_hmodule = GetModuleHandleA("opengl32.dll");
+	win32_hinstance = GetModuleHandleA(0);
+	win32_gl_hmodule = GetModuleHandleA("opengl32.dll");
 	
 	HDC dummy_hdc = GetDC(hwnd);
 	
@@ -36,25 +51,29 @@ gl_os_init(void *window_handle)
 			ASSERT(true);
 	}
 	
-	gl_win32_ctx = wglCreateContext(dummy_hdc);
-	if (gl_win32_ctx == 0)
+	win32_gl_ctx = wglCreateContext(dummy_hdc);
+	if (win32_gl_ctx == 0)
 		ASSERT(true);
 	
-	if (!wglMakeCurrent(dummy_hdc, gl_win32_ctx))
+	if (!wglMakeCurrent(dummy_hdc, win32_gl_ctx))
 		ASSERT(true);
 	
-	wglSwapInterval = (wgl_swap_interval_ext *)wglGetProcAddress("wglSwapIntervalEXT");
-	if (wglSwapInterval)
+#define LOAD_WGL_FUNC(N) N = (N##Function *)win32_get_gl_func_address(win32_gl_hmodule, #N); ASSERT(N == 0);
+#define GL_FUNC(N, T, P) LOAD_WGL_FUNC(N)
+#include "forge_renderer_opengl_funcs.h"
+	
+	LOAD_WGL_FUNC(wglSwapIntervalEXT);
+	if (wglSwapIntervalEXT)
 	{
-		wglSwapInterval(1);
+		wglSwapIntervalEXT(1);
 	}
 	else
 	{
-		LOG_WARNING("Get func address failed: wglSwapInterval");
+		LOG_WARNING("Get func address failed: wglSwapIntervalEXT");
 	}
 	
 	wglMakeCurrent(0, 0);
-	ReleaseDC(gl_win32_ctx, dummy_hdc);
+	ReleaseDC(hwnd, dummy_hdc);
 }
 
 internal void 
@@ -64,7 +83,7 @@ gl_os_select_window(void *window_handle)
 	
 	HWND hwnd = window_handle;
     HDC hdc = GetDC(hwnd);
-	wglMakeCurrent(hdc, gl_win32_ctx);
+	wglMakeCurrent(hdc, win32_gl_ctx);
 	ReleaseDC(hwnd, hdc);
 }
 
