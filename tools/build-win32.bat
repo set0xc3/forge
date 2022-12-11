@@ -51,7 +51,7 @@ if not exist .\assets\ mklink /J ".\assets" "%ROOT%\assets"
 
 set OUT_NAME=forge
 set SOURCE="%CODE_DIR%\forge.c"
-set LIBS=-lKernel32.lib -lUser32.lib -lGdi32.lib
+set LIBS=-lKernel32.lib -lUser32.lib -lGdi32.lib -lShell32.lib
 set FLAGS=-std=c11 -O0 -Wall -Wextra
 set FLAGS=%FLAGS% -Wno-unused-parameter -Wno-unused-function -Wno-unused-parameter -Wno-unused-variable -Wno-unused-but-set-variable -Wno-missing-declarations -Wno-missing-braces -Wno-implicit-function-declaration -Wno-deprecated-declarations -Wno-nonportable-include-path -Wno-ignored-pragma-intrinsic -Wno-ignored-attributes -Wno-pragma-pack -Wno-unknown-pragmas -Wno-microsoft-anon-tag
 set FLAGS=%FLAGS% -DFR_PLATFORM_WINDOWS=1 -DFR_DYNAMIC_LINK_API=1 -DFR_CONSOLE=1

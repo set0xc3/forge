@@ -1,4 +1,5 @@
-#include <Windows.h>
+#include <windows.h>
+#include <shellapi.h>
 
 void WINAPI
 win32_file_io_completion_routine(DWORD error_code,
@@ -275,6 +276,32 @@ int WINAPI
 wWinMain(HINSTANCE instance, HINSTANCE prev_instance, PWSTR cmd_line, int cmd_show)
 #endif
 {
+	/*
+ Usage: forge.exe [OPTIONS]
+
+Options:
+-h, --help
+--vestion
+-f, --full-screen
+--console
+--vulkan
+--opengl
+	*/
+	
+	i32 arg_count = 0;
+	char **arg_list = 0;
+	
+	arg_list = (char **)CommandLineToArgvW(GetCommandLineW(), &arg_count);
+	
+	LOG_DEBUG("[WIN] args: %i", arg_count);
+	for (i32 i = 0; i < arg_count; i++)
+	{
+		if (arg_list[i][0] == '-')
+		{
+			LOG_DEBUG("[WIN] arg_list: %ws", arg_list[i]);
+		}
+	}
+	
 	app_run();
 	
 	return EXIT_SUCCESS;
@@ -401,8 +428,8 @@ FR_API f64
 os_time_now(void)
 {
 	LARGE_INTEGER result;
-    QueryPerformanceCounter(&result);
-    return (f64)result.QuadPart;
+	QueryPerformanceCounter(&result);
+	return (f64)result.QuadPart;
 }
 
 FR_API f64 
