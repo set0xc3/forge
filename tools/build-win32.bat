@@ -152,7 +152,7 @@ set INCLUDE=%INCLUDE% -I"%CODE_DIR%"
 : -------- Dynamic library --------
 if %MODE_RENDERER%=="opengl" (
 echo "[+] Building %OUT_NAME%.dll"
-clang  %INCLUDE% %FLAGS% %SOURCE% -c -o .\%OUT_NAME%.o
+clang %INCLUDE% %FLAGS% %SOURCE% -c -o .\%OUT_NAME%.o
 clang %INCLUDE% %LIBS% %FLAGS% -shared -o .\%OUT_NAME%.dll .\%OUT_NAME%.o
 )
 

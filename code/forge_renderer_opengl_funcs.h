@@ -16,5 +16,6 @@ GL_FUNC(glVertexAttribPointer, void, (GLuint index, GLint size, GLenum type, GLb
 GL_FUNC(glEnableVertexAttribArray, void, (GLuint index))
 GL_FUNC(glBindVertexArray, void, (GLuint array))
 GL_FUNC(glGenVertexArrays, void, (GLsizei n, GLuint *arrays))
+GL_FUNC(glDeleteBuffers, void, (GLsizei n, const GLuint *buffers))
 
 #undef GL_FUNC

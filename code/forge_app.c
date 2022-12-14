@@ -36,9 +36,6 @@ app_run(void)
 		f64 counter_elapsed = (f64)(begin_counter - end_counter);
 		f32 ms_per_frame    = (f32)(counter_elapsed / perf_count_frequency);
 		f32 fps             = (f32)(perf_count_frequency / counter_elapsed);
-#if 0
-#endif
-		
 #if 1
 		if (ms_per_frame >= period_max)
 #endif

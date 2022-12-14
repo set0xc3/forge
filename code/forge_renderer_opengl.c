@@ -1,7 +1,5 @@
 #include "forge.h"
 
-#include "forge_renderer.h"
-
 #if FR_PLATFORM_WINDOWS
 #include <windows.h>
 #include <gl/gl.h>
@@ -21,11 +19,11 @@
 #error missing platform detection
 #endif
 
-global u32 shader_program_id = 0;
+global Shader shader = {0};
 global u32 VBO, VAO, EBO = 0;
 
 internal u32 
-gl_create_shader(const char *vs_path, const char *fs_path)
+gl_shader_create(const char *vs_path, const char *fs_path)
 {
     u32 result = 0;
 	i32 success = 0;
@@ -69,79 +67,63 @@ gl_create_shader(const char *vs_path, const char *fs_path)
 	return result;
 }
 
-internal void 
-gl_draw_rectangle(Vector2f min, Vector2f max, Vector4f color)
-{
-	glBegin(GL_TRIANGLES);
-	
-	glColor4f(color.x, color.y, color.z, color.w);
-	
-	// Lower triangle
-	glVertex2f(min.x, min.y);
-	glVertex2f(max.x, min.y);
-	glVertex2f(max.x, max.y);
-	
-	// Upper triangle
-	glVertex2f(min.x, min.y);
-	glVertex2f(max.x, max.y);
-	glVertex2f(min.x, max.y);
-	
-	glEnd();
-}
-
 FR_API void
 init(void *window_handle)
 {
 	gl_os_init(window_handle);
 	
-	gl_os_select_window(window_handle);
+	gl_os_window_select(window_handle);
 	
-	shader_program_id = gl_create_shader("assets/shaders/shader.vert", "assets/shaders/shader.frag");
+	shader.id = gl_shader_create("assets/shaders/shader.vert", "assets/shaders/shader.frag");
 	
-	Vertex3d vertex[3] = {0}; 
+	Vertex2d vertex[] = 
 	{
-		vertex[0].position = v3f(0.5f, -0.5f, 0.0f);
-		vertex[0].color    = v3f(1.0f, 0.0f, 0.0f);
-		vertex[1].position = v3f(-0.5f, -0.5f, 0.0f);
-		vertex[1].color    = v3f(0.0f, 1.0f, 0.0f);
-		vertex[2].position = v3f(0.0f, 0.5f, 0.0f);
-		vertex[2].color    = v3f(0.0f, 0.0f, 1.0f);
-	}
-	
+		-0.5f, -0.5f,  1.0f, 0.0f, 1.0f,  0.0f, 0.0f,
+		0.5f, -0.5f,  1.0f, 0.0f, 1.0f,  0.0f, 0.0f,
+		0.5f, 0.5f,  1.0f, 0.0f, 1.0f,  0.0f, 0.0f,
+		-0.5f, 0.5f,  1.0f, 0.0f, 1.0f,  0.0f, 0.0f,
+	}; 
 	u32 indices[] = 
 	{
         0, 1, 3,
         1, 2, 3
     };
+	
     glGenVertexArrays(1, &VAO);
 	
     glGenBuffers(1, &VBO);
-    //glGenBuffers(1, &EBO);
+    glGenBuffers(1, &EBO);
     
 	glBindVertexArray(VAO);
 	
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertex), vertex, GL_STATIC_DRAW);
 	
-    //glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-    //glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 	
 	// position
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(f32), (void*)0);
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 7 * sizeof(f32), (void*)0);
     glEnableVertexAttribArray(0);
 	
 	// color
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(f32), (void*)(3 * sizeof(f32)));
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 7 * sizeof(f32), (void*)(2 * sizeof(f32)));
     glEnableVertexAttribArray(1);
+	
+	// uv
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 7 * sizeof(f32), (void*)(5 * sizeof(f32)));
+    glEnableVertexAttribArray(2);
 	
     glBindBuffer(GL_ARRAY_BUFFER, 0); 
     glBindVertexArray(0); 
+	
+	glDeleteBuffers(1, &VBO);
 }
 
 FR_API void 
 begin(void *window_handle)
 {
-	gl_os_select_window(window_handle);
+	gl_os_window_select(window_handle);
 	
 	glViewport(0, 0, 800, 600); 
 	
@@ -152,14 +134,12 @@ begin(void *window_handle)
 FR_API void 
 submit(void *window_handle)
 {
-	gl_os_select_window(window_handle);
+	gl_os_window_select(window_handle);
 	
-	glUseProgram(shader_program_id);
+	glUseProgram(shader.id);
 	glBindVertexArray(VAO);
-	glDrawArrays(GL_TRIANGLES, 0, 3);
-	//glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-	
-	//gl_draw_rectangle(v2f(0.0f, 0.0f), v2f(0.5f, 0.5f), v4f(1.0f, 0.0f, 1.0f, 1.0f));
+	//glDrawArrays(GL_TRIANGLES, 0, 3);
+	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 }
 
 FR_API void 

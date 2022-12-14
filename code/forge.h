@@ -5,5 +5,6 @@
 #include "forge_string.h"
 #include "forge_logger.h"
 #include "forge_renderer.h"
+#include "forge_renderer_types.h"
 
 #include "forge_os.h"

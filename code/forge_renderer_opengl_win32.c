@@ -26,14 +26,15 @@ gl_os_init(void *window_handle)
 {
 	ASSERT(window_handle == 0);
 	
-	HWND hwnd = window_handle;
+	HWND hwnd = (HWND)window_handle;
 	
 	win32_hinstance = GetModuleHandleA(0);
 	win32_gl_hmodule = GetModuleHandleA("opengl32.dll");
 	
 	HDC dummy_hdc = GetDC(hwnd);
 	
-	PIXELFORMATDESCRIPTOR format = {0};
+	PIXELFORMATDESCRIPTOR format;
+	MEMORY_ZERO_STRUCT(&format, sizeof(PIXELFORMATDESCRIPTOR));
 	{
 		format.nSize      = sizeof(format);
 		format.nVersion   = 1;
@@ -77,11 +78,11 @@ gl_os_init(void *window_handle)
 }
 
 internal void 
-gl_os_select_window(void *window_handle)
+gl_os_window_select(void *window_handle)
 {
 	ASSERT(window_handle == 0);
 	
-	HWND hwnd = window_handle;
+	HWND hwnd = (HWND)window_handle;
     HDC hdc = GetDC(hwnd);
 	wglMakeCurrent(hdc, win32_gl_ctx);
 	ReleaseDC(hwnd, hdc);
@@ -92,7 +93,7 @@ gl_os_finish(void *window_handle)
 {
 	ASSERT(window_handle == 0);
 	
-	HWND hwnd = window_handle;
+	HWND hwnd = (HWND)window_handle;
 	HDC hdc = GetDC(hwnd);
 	SwapBuffers(hdc);
 	ReleaseDC(hwnd, hdc);
